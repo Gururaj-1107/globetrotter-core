@@ -1,0 +1,179 @@
+// Prisma schema for GlobeTrotter (Local PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AuthProvider {
+  EMAIL_PASSWORD
+  GOOGLE
+  BOTH
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String?
+  authProvider AuthProvider @default(EMAIL_PASSWORD)
+  googleId     String?      @unique
+  firstName    String
+  lastName     String
+  phoneNumber  String?
+  city         String?
+  country      String?
+  avatarUrl    String?
+  bio          String?
+  role         Role         @default(USER)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  trips          Trip[]
+  communityPosts CommunityPost[]
+  tripLikes      TripLike[]
+}
+
+model City {
+  id              String     @id
+  name            String
+  country         String
+  region          String
+  costIndex       Int        @default(3)
+  popularityScore Int        @default(85)
+  imageUrl        String
+  description     String
+  createdAt       DateTime   @default(now())
+
+  activities      Activity[]
+  stops           Stop[]
+}
+
+model Activity {
+  id            String          @id @default(uuid())
+  cityId        String
+  name          String
+  category      String
+  cost          Float           @default(0)
+  duration      String          @default("2 hours")
+  rating        Float           @default(4.8)
+  imageUrl      String
+  description   String
+  createdAt     DateTime        @default(now())
+
+  city          City            @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  itineraryItems ItineraryItem[]
+}
+
+model Trip {
+  id                   String          @id @default(uuid())
+  userId               String
+  title                String
+  city                 String
+  startDate            DateTime
+  endDate              DateTime
+  budget               Float           @default(0)
+  totalEstimatedBudget Float           @default(0)
+  status               String          @default("UPCOMING") // ONGOING, UPCOMING, COMPLETED
+  themes               String[]        @default([])
+  coverImageUrl        String?
+  isPublic             Boolean         @default(false)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops                Stop[]
+  expenses             Expense[]
+  communityPosts       CommunityPost[]
+  tripLikes            TripLike[]
+}
+
+model Stop {
+  id          String          @id @default(uuid())
+  tripId      String
+  cityId      String?
+  name        String
+  category    String          @default("Activity") // Transport, Stay, Activity, Meals, Misc
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  budget      Float           @default(0)
+  orderIndex  Int             @default(0)
+  createdAt   DateTime        @default(now())
+
+  trip        Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city        City?           @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  activities  ItineraryItem[]
+}
+
+model ItineraryItem {
+  id         String    @id @default(uuid())
+  stopId     String
+  activityId String?
+  name       String
+  category   String    @default("Sightseeing")
+  cost       Float     @default(0)
+  duration   String    @default("2 hours")
+  timeSlot   String    @default("09:00 AM")
+  dayNumber  Int       @default(1)
+  orderIndex Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  stop       Stop      @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  tripId      String
+  category    String   @default("MISC") // TRANSPORT, STAY, ACTIVITIES, MEALS, MISC
+  amount      Float
+  expenseDate DateTime @default(now())
+  note        String?
+  createdAt   DateTime @default(now())
+
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model CommunityPost {
+  id            String     @id @default(uuid())
+  tripId        String?
+  userId        String?
+  authorName    String
+  authorAvatar  String
+  title         String
+  city          String
+  citiesVisited String[]   @default([])
+  durationDays  Int        @default(5)
+  budget        Float      @default(0)
+  image         String
+  likes         Int        @default(0)
+  copies        Int        @default(0)
+  createdAt     DateTime   @default(now())
+
+  trip          Trip?      @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tripLikes     TripLike[]
+}
+
+model TripLike {
+  id              String         @id @default(uuid())
+  userId          String
+  tripId          String?
+  communityPostId String?
+  createdAt       DateTime       @default(now())
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip            Trip?          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  communityPost   CommunityPost? @relation(fields: [communityPostId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityPostId])
+}

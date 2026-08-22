@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Globe, Menu, X, User } from 'lucide-react'
+import { Globe, Menu, X, Shield, Sparkles } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 const landingLinks = [
   { label: 'Explore', href: '#explore' },
@@ -25,9 +26,11 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, logout, isAuthenticated } = useAuth()
 
   // Determine if we are on landing pages or in-app dashboard views
   const isAppView = 
+    isAuthenticated ||
     location.pathname.startsWith('/dashboard') ||
     location.pathname.startsWith('/search') ||
     location.pathname.startsWith('/trips') ||
@@ -35,18 +38,6 @@ export default function Navbar() {
     location.pathname.startsWith('/calendar') ||
     location.pathname.startsWith('/profile') ||
     location.pathname.startsWith('/admin')
-
-  // Get user avatar from local storage profile cache
-  const [userAvatar, setUserAvatar] = useState('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80')
-  useEffect(() => {
-    const profile = localStorage.getItem('globetrotter_user_profile')
-    if (profile) {
-      try {
-        const parsed = JSON.parse(profile)
-        if (parsed.avatar) setUserAvatar(parsed.avatar)
-      } catch (e) {}
-    }
-  }, [location.pathname])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60)
@@ -56,6 +47,13 @@ export default function Navbar() {
 
   const activeLinks = isAppView ? appLinks : landingLinks
 
+  const handleSignOut = () => {
+    logout()
+    navigate('/')
+  }
+
+  const userAvatar = user?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'
+
   return (
     <>
       <motion.nav
@@ -64,7 +62,7 @@ export default function Navbar() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled || isAppView
-            ? 'bg-black/80 backdrop-blur-xl border-b border-white/10'
+            ? 'bg-black/85 backdrop-blur-xl border-b border-white/10'
             : 'bg-transparent'
         }`}
       >
@@ -80,19 +78,23 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-5">
             {activeLinks.map((link) => {
-              const isActive = isAppView ? location.pathname === link.href : false
+              const isActive = location.pathname === link.href
+              const isAdminLink = link.href === '/admin'
               return isAppView ? (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-bold tracking-wide uppercase transition-all duration-200 ${
+                  className={`text-xs px-3 py-1.5 rounded-lg font-bold tracking-wide uppercase transition-all duration-200 flex items-center gap-1.5 ${
                     isActive 
-                      ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20'
-                      : 'text-white/60 hover:text-white'
+                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                      : isAdminLink
+                        ? 'text-purple-300 hover:text-purple-200'
+                        : 'text-white/60 hover:text-white'
                   }`}
                 >
+                  {isAdminLink && <Shield size={12} className="text-purple-400" />}
                   {link.label}
                 </Link>
               ) : (
@@ -111,13 +113,18 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAppView ? (
               <div className="flex items-center gap-3">
+                {user && (
+                  <span className="text-xs text-white/60 font-medium hidden xl:inline">
+                    Hello, <strong className="text-white">{user.firstName}</strong>
+                  </span>
+                )}
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={handleSignOut}
                   className="text-xs text-white/60 hover:text-white px-3 py-1.5 border border-white/10 hover:border-white/20 rounded-xl transition-all cursor-pointer font-bold uppercase tracking-wide"
                 >
                   Sign Out
                 </button>
-                <Link to="/profile" className="w-9 h-9 rounded-full border border-blue-500/40 overflow-hidden shadow cursor-pointer">
+                <Link to="/profile" className="w-9 h-9 rounded-full border-2 border-blue-500/40 overflow-hidden shadow-lg hover:border-blue-400 transition-all cursor-pointer">
                   <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
                 </Link>
               </div>
@@ -125,13 +132,13 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="text-sm text-white/80 hover:text-white px-4 py-2 rounded-full transition-colors"
+                  className="text-sm text-white/80 hover:text-white px-4 py-2 rounded-full transition-colors cursor-pointer"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
-                  className="text-sm bg-white text-black font-semibold px-5 py-2 rounded-full hover:bg-white/90 transition-all duration-200 shadow-lg"
+                  className="text-sm bg-white text-black font-semibold px-5 py-2 rounded-full hover:bg-white/90 transition-all duration-200 shadow-lg cursor-pointer"
                 >
                   Get Started
                 </button>
@@ -141,7 +148,7 @@ export default function Navbar() {
 
           {/* Mobile Menu */}
           <button
-            className="lg:hidden text-white/80 hover:text-white"
+            className="lg:hidden text-white/80 hover:text-white cursor-pointer"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -187,7 +194,7 @@ export default function Navbar() {
             <div className="flex gap-3 pt-2">
               {isAppView ? (
                 <button
-                  onClick={() => { navigate('/'); setMobileOpen(false) }}
+                  onClick={() => { handleSignOut(); setMobileOpen(false) }}
                   className="flex-1 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm font-semibold text-white cursor-pointer"
                 >
                   Sign Out
@@ -196,13 +203,13 @@ export default function Navbar() {
                 <>
                   <button
                     onClick={() => { navigate('/login'); setMobileOpen(false) }}
-                    className="flex-1 py-2.5 border border-white/20 rounded-full text-sm text-white"
+                    className="flex-1 py-2.5 border border-white/20 rounded-full text-sm text-white cursor-pointer"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => { navigate('/signup'); setMobileOpen(false) }}
-                    className="flex-1 py-2.5 bg-white text-black rounded-full text-sm font-semibold"
+                    className="flex-1 py-2.5 bg-white text-black rounded-full text-sm font-semibold cursor-pointer"
                   >
                     Get Started
                   </button>
