@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import voyaraBanner from '../assets/voyara_travels.jpg'
 
 interface RegionalDestination {
   id: string
@@ -148,36 +149,17 @@ export default function DashboardPage() {
 
       <main className="flex-grow">
         {/* Cinematic Header Banner */}
-        <section className="relative h-[65vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[65vh] flex flex-col justify-end pb-12 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img 
-              src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80" 
-              alt="GlobeTrotter Banner" 
-              className="w-full h-full object-cover opacity-60 scale-105 transform motion-safe:animate-[pulse_10s_infinite]"
+              src={voyaraBanner} 
+              alt="Voyara Travels Banner" 
+              className="w-full h-full object-cover opacity-85 scale-100 transform"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-            <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
           </div>
 
-          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-4"
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
-                <Sparkles size={12} />
-                Welcome Back, Traveler
-              </div>
-              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-xl text-shadow-hero">
-                Where is your next <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">adventure</span>?
-              </h1>
-              <p className="text-neutral-300 max-w-xl mx-auto text-base md:text-lg">
-                Explore handcrafted itineraries, discover offbeat activities, and curate your custom itinerary.
-              </p>
-            </motion.div>
-
+          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
             {/* Global Search Bar Overlay */}
             <motion.form
               initial={{ opacity: 0, y: 20 }}

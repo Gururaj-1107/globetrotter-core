@@ -108,9 +108,7 @@ export default function DestinationsSection() {
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               onMouseEnter={() => setHovered(dest.id)}
               onMouseLeave={() => setHovered(null)}
-              className={`relative overflow-hidden rounded-2xl cursor-pointer group ${
-                i === 0 || i === 3 ? 'aspect-[4/5]' : 'aspect-[4/4]'
-              }`}
+              className="relative overflow-hidden rounded-2xl cursor-pointer group aspect-[4/5]"
             >
               {/* Image */}
               <motion.img

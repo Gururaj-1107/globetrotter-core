@@ -64,3 +64,137 @@
 .parallax-layer {
   will-change: transform;
 }
+
+/* Print Styles for PDF Export */
+@media print {
+  /* Hide non-printable elements */
+  nav,
+  footer,
+  .no-print,
+  button,
+  select,
+  input,
+  .interactive-controls {
+    display: none !important;
+  }
+
+  /* Reset main layouts and body background */
+  body, 
+  #app, 
+  main, 
+  .relative {
+    background: #ffffff !important;
+    color: #111111 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    min-height: auto !important;
+  }
+
+  /* Force exact color/background printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Override headings to be deep black */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000000 !important;
+  }
+
+  /* Make default paragraphs, spans, and divs highly readable */
+  p, span, div {
+    color: #1a1a1a !important;
+  }
+
+  /* Override light grey texts for readability */
+  .text-neutral-400,
+  .text-neutral-500,
+  .text-neutral-600,
+  .text-zinc-400,
+  .text-zinc-500,
+  .text-white\/40,
+  .text-white\/50,
+  .text-white\/60,
+  .text-white\/75,
+  .text-white\/80,
+  .text-neutral-300,
+  .text-neutral-200,
+  .text-neutral-100 {
+    color: #334155 !important; /* Dark slate gray */
+  }
+
+  /* High contrast colors for positive/negative status values */
+  .text-emerald-400 {
+    color: #15803d !important; /* Dark green */
+    font-weight: 800 !important;
+  }
+  
+  .text-red-400 {
+    color: #b91c1c !important; /* Dark red */
+    font-weight: 800 !important;
+  }
+
+  /* Node cards and sidebar analysis containers */
+  .bg-zinc-950,
+  .bg-neutral-950,
+  .bg-neutral-900,
+  .bg-black\/40,
+  .bg-black\/60 {
+    background-color: #f8fafc !important; /* Very light slate gray */
+    border-color: #cbd5e1 !important; /* Visible border */
+    color: #111111 !important;
+    box-shadow: none !important;
+  }
+
+  /* Category pills */
+  .bg-neutral-900.border.border-neutral-800 {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+  }
+
+  /* Timeline connecting vertical line */
+  .absolute.left-\[11px\].top-2.bottom-2.w-0\.5 {
+    background: #64748b !important;
+  }
+
+  /* Node bullet points */
+  .absolute.left-\[-20px\].top-4\.5.w-2\.5 {
+    background-color: #475569 !important;
+    border-color: #1e293b !important;
+  }
+
+  /* Connecting arrow icons */
+  .absolute.left-\[-20px\].bottom-\[-22px\] {
+    color: #475569 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  /* Expense pill box in activities */
+  .bg-emerald-950\/20 {
+    background-color: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+  }
+
+  /* Progress bar tracks */
+  .w-full.bg-neutral-900,
+  .w-full.bg-black {
+    background-color: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Solid fills for progress indicators */
+  .bg-gradient-to-r.from-emerald-500.to-cyan-500 {
+    background: #10b981 !important;
+  }
+
+  .bg-gradient-to-r.from-red-500.to-rose-600 {
+    background: #ef4444 !important;
+  }
+
+  .bg-blue-500 {
+    background-color: #3b82f6 !important;
+  }
+}

@@ -54,7 +54,6 @@ export default function HeroSection() {
   const navigate = useNavigate()
   const sectionRef = useRef<HTMLDivElement>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoaded, setIsLoaded] = useState(false)
@@ -70,20 +69,14 @@ export default function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08])
 
-  // Auto-advance slides
+  // Auto-advance slides every 2 seconds
   useEffect(() => {
     setIsLoaded(true)
     const interval = setInterval(() => {
-      if (!isTransitioning) {
-        setIsTransitioning(true)
-        setTimeout(() => {
-          setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
-          setIsTransitioning(false)
-        }, 600)
-      }
-    }, 6000)
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }, 2000)
     return () => clearInterval(interval)
-  }, [isTransitioning])
+  }, [currentSlide])
 
   // Subtle mouse parallax
   useEffect(() => {

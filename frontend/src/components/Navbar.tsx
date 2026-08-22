@@ -5,10 +5,9 @@ import { Globe, Menu, X, Shield } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const landingLinks = [
-  { label: 'Explore', href: '#explore' },
+  { label: 'Destinations', href: '#destinations' },
   { label: 'How it Works', href: '#how-it-works' },
   { label: 'Community', href: '#community' },
-  { label: 'About', href: '#about' },
 ]
 
 const baseAppLinks = [
@@ -77,7 +76,7 @@ export default function Navbar() {
               <Globe size={16} className="text-white" />
             </div>
             <span className="font-bold text-lg tracking-tight text-white">
-              Globe<span className="text-blue-400">Trotter</span>
+              Voyara <span className="text-blue-400">Travels</span>
             </span>
           </Link>
 
@@ -135,8 +134,8 @@ export default function Navbar() {
                 >
                   Sign Out
                 </button>
-                <Link to="/profile" className="w-9 h-9 rounded-full border-2 border-blue-500/40 overflow-hidden shadow-lg hover:border-blue-400 transition-all cursor-pointer">
-                  <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                <Link to="/profile" className="w-9 h-9 rounded-full border-2 border-blue-500/40 bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg hover:border-blue-400 transition-all cursor-pointer text-white font-bold text-sm select-none">
+                  {user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'U'}
                 </Link>
               </div>
             ) : (

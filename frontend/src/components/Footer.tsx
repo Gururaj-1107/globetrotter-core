@@ -26,7 +26,7 @@ export default function Footer() {
                 <Globe size={16} className="text-white" />
               </div>
               <span className="font-bold text-lg text-white">
-                Globe<span className="text-blue-400">Trotter</span>
+                Voyara <span className="text-blue-400">Travels</span>
               </span>
             </Link>
             <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-5">
@@ -64,10 +64,10 @@ export default function Footer() {
 
         <div className="border-t border-white/8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-sm">
-            © 2026 GlobeTrotter. Built for Odoo Hackathon.
+            © 2026 Voyara Travels. Built for Odoo Hackathon.
           </p>
           <p className="text-white/20 text-xs">
-            Made with ♥ by Team GlobeTrotter
+            Made with ♥ by Team Voyara Travels
           </p>
         </div>
       </div>

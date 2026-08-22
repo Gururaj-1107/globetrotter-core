@@ -317,7 +317,7 @@ export default function ItineraryViewPage() {
       <main className="flex-grow pt-24 pb-16 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Back Navigation & Info Header */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between no-print">
             <button
               onClick={() => navigate(`/trips/${trip.id}/builder`)}
               className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
@@ -337,7 +337,7 @@ export default function ItineraryViewPage() {
               </p>
             </div>
             {/* Top right PDF/Share actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 no-print">
               <button
                 onClick={handleExportPDF}
                 disabled={exporting}
@@ -357,7 +357,7 @@ export default function ItineraryViewPage() {
           </div>
 
           {/* Interactive controls bar */}
-          <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 mb-8 flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 mb-8 flex flex-col lg:flex-row items-center justify-between gap-4 no-print">
             {/* Search */}
             <div className="relative w-full lg:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
@@ -570,7 +570,7 @@ export default function ItineraryViewPage() {
               </div>
 
               {/* Mini Community Callout */}
-              <div className="bg-gradient-to-br from-blue-900/10 to-cyan-900/10 border border-blue-500/15 rounded-3xl p-6 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-900/10 to-cyan-900/10 border border-blue-500/15 rounded-3xl p-6 relative overflow-hidden no-print">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <Compass size={80} className="text-cyan-400" />
                 </div>
