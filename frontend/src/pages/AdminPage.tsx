@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Users, 
@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { api } from '../services/api'
+import { AdminStats } from '../services/mockData'
 
 interface UserRecord {
   id: string
@@ -37,6 +39,22 @@ const INITIAL_USERS: UserRecord[] = [
 export default function AdminPage() {
   const [users, setUsers] = useState<UserRecord[]>(INITIAL_USERS)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  
+  // Timeframe selector state
+  const [timeRange, setTimeRange] = useState<'7days' | '30days' | '1year'>('30days')
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch admin stats when timeframe selector changes
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true)
+      const data = await api.getAdminMetrics(timeRange)
+      setStats(data)
+      setLoading(false)
+    }
+    fetchStats()
+  }, [timeRange])
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -72,6 +90,33 @@ export default function AdminPage() {
     }))
   }
 
+  // Helper function to build dynamic SVG line charts path
+  const getGrowthSvgPath = () => {
+    if (!stats) return ''
+    const points = stats.userGrowth[timeRange] || []
+    if (points.length === 0) return ''
+    const minVal = Math.min(...points.map((p) => p.count)) - 50
+    const maxVal = Math.max(...points.map((p) => p.count)) + 50
+    const height = 150
+    const width = 300
+    
+    return points.map((p, idx) => {
+      const x = 15 + (idx / (points.length - 1)) * (width - 30)
+      const ratio = (p.count - minVal) / (maxVal - minVal)
+      const y = height - 20 - ratio * (height - 40)
+      return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
+    }).join(' ')
+  }
+
+  const getGrowthFillPath = () => {
+    const strokePath = getGrowthSvgPath()
+    if (!strokePath || !stats) return ''
+    const points = stats.userGrowth[timeRange] || []
+    const width = 300
+    const lastX = 15 + (points.length - 1) / (points.length - 1) * (width - 30)
+    return `${strokePath} L ${lastX.toFixed(1)} 140 L 15 140 Z`
+  }
+
   return (
     <div className="relative bg-black text-white min-h-screen flex flex-col font-sans">
       <Navbar />
@@ -86,21 +131,40 @@ export default function AdminPage() {
         )}
 
         {/* Heading */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold flex items-center gap-2">
-            <Sliders className="text-blue-400" size={28} />
-            Admin Control Center & Analytics
-          </h1>
-          <p className="text-neutral-400 text-sm mt-1">Monitor user metrics, manage account credentials, and inspect analytics data logs.</p>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold flex items-center gap-2">
+              <Sliders className="text-blue-400" size={28} />
+              Admin Control Center & Analytics
+            </h1>
+            <p className="text-neutral-400 text-sm mt-1">Monitor user metrics, manage account credentials, and inspect analytics data logs.</p>
+          </div>
+
+          {/* Interactive filter tabs */}
+          <div className="flex border border-neutral-900 bg-zinc-950 p-1 rounded-2xl w-fit">
+            {(['7days', '30days', '1year'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setTimeRange(tab)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  timeRange === tab 
+                    ? 'bg-blue-600 text-white'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                {tab === '7days' ? '7 Days' : tab === '30days' ? '30 Days' : '1 Year'}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { label: 'Total Accounts', val: '1,420', diff: '+12% this month', icon: <Users className="text-blue-400" size={22} /> },
-            { label: 'Active Trips', val: '842', diff: '+8% this month', icon: <Map className="text-cyan-400" size={22} /> },
-            { label: 'Total Itineraries', val: '3,892', diff: '+15% total logs', icon: <Layers className="text-emerald-400" size={22} /> },
-            { label: 'Total Budget Vol.', val: '$1.25M', diff: 'Average $3.1K/trip', icon: <DollarSign className="text-amber-400" size={22} /> }
+            { label: 'Total Accounts', val: stats?.metrics.totalUsers.toLocaleString() || '1,420', diff: '+12% this month', icon: <Users className="text-blue-400" size={22} /> },
+            { label: 'Active Trips', val: stats?.metrics.activeTrips.toLocaleString() || '842', diff: '+8% this month', icon: <Map className="text-cyan-400" size={22} /> },
+            { label: 'Total Itineraries', val: stats?.metrics.totalItineraries.toLocaleString() || '3,892', diff: '+15% total logs', icon: <Layers className="text-emerald-400" size={22} /> },
+            { label: 'Total Budget Vol.', val: `$${((stats?.metrics.revenueBudgetVolume || 1250000) / 1000000).toFixed(2)}M`, diff: 'Average $3.1K/trip', icon: <DollarSign className="text-amber-400" size={22} /> }
           ].map((metric, idx) => (
             <div key={idx} className="bg-zinc-950 border border-neutral-900 rounded-3xl p-5 shadow-xl flex items-center gap-4">
               <div className="p-3 bg-neutral-900 border border-neutral-850 rounded-2xl shrink-0">
@@ -129,32 +193,39 @@ export default function AdminPage() {
             
             {/* SVG Custom Bar Chart */}
             <div className="h-56 w-full flex items-end justify-between px-2 pt-4 relative border-b border-neutral-900 pb-2">
-              {[
-                { label: 'Paris', val: 78, color: 'from-blue-500 to-cyan-400' },
-                { label: 'Tokyo', val: 92, color: 'from-amber-500 to-orange-400' },
-                { label: 'Rome', val: 65, color: 'from-emerald-500 to-teal-400' },
-                { label: 'Sydney', val: 54, color: 'from-rose-500 to-pink-400' },
-                { label: 'NYC', val: 84, color: 'from-violet-500 to-purple-400' }
-              ].map((bar, index) => (
-                <div key={index} className="flex flex-col items-center gap-2 group relative w-1/6">
-                  {/* Val bubble */}
-                  <span className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-neutral-900 border border-neutral-800 text-white text-[9px] px-1.5 py-0.5 rounded font-bold transition-all shadow-lg">
-                    {bar.val}
-                  </span>
-                  
-                  {/* Bar */}
-                  <div className="w-6 bg-neutral-900 rounded-t-lg h-40 flex items-end">
-                    <motion.div 
-                      initial={{ height: 0 }}
-                      animate={{ height: `${bar.val}%` }}
-                      transition={{ duration: 1, delay: index * 0.1 }}
-                      className={`w-full rounded-t-lg bg-gradient-to-t ${bar.color} shadow-md`}
-                    />
+              {(stats?.popularCities || [
+                { city: 'Paris', percentage: 78 },
+                { city: 'Tokyo', percentage: 92 },
+                { city: 'Rome', percentage: 65 },
+                { city: 'Sydney', percentage: 54 },
+                { city: 'NYC', percentage: 84 }
+              ]).map((bar, index) => {
+                const colors = [
+                  'from-blue-500 to-cyan-400',
+                  'from-amber-500 to-orange-400',
+                  'from-emerald-500 to-teal-400',
+                  'from-rose-500 to-pink-400',
+                  'from-violet-500 to-purple-400'
+                ]
+                return (
+                  <div key={index} className="flex flex-col items-center gap-2 group relative w-1/6">
+                    <span className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-neutral-900 border border-neutral-800 text-white text-[9px] px-1.5 py-0.5 rounded font-bold transition-all shadow-lg z-10">
+                      {bar.percentage}%
+                    </span>
+                    
+                    <div className="w-6 bg-neutral-900 rounded-t-lg h-40 flex items-end">
+                      <motion.div 
+                        initial={{ height: 0 }}
+                        animate={{ height: `${bar.percentage}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className={`w-full rounded-t-lg bg-gradient-to-t ${colors[index % colors.length]} shadow-md`}
+                      />
+                    </div>
+                    
+                    <span className="text-[10px] text-neutral-400 font-bold mt-1 truncate w-full text-center">{bar.city}</span>
                   </div>
-                  
-                  <span className="text-[10px] text-neutral-400 font-bold mt-1">{bar.label}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -163,57 +234,72 @@ export default function AdminPage() {
             <div className="mb-4">
               <h3 className="font-extrabold text-base flex items-center gap-1.5">
                 <TrendingUp size={18} className="text-blue-400" />
-                Monthly User Signups
+                User Account Registrations
               </h3>
-              <p className="text-neutral-500 text-xs mt-0.5">Growth curve over past 6 months</p>
+              <p className="text-neutral-500 text-xs mt-0.5">Growth curve over selected timeframe</p>
             </div>
 
             {/* SVG Trend Line */}
             <div className="h-56 w-full relative">
-              <svg className="w-full h-full" viewBox="0 0 300 150">
-                {/* Grid lines */}
-                <line x1="0" y1="30" x2="300" y2="30" stroke="#1f1f1f" strokeDasharray="3,3" />
-                <line x1="0" y1="75" x2="300" y2="75" stroke="#1f1f1f" strokeDasharray="3,3" />
-                <line x1="0" y1="120" x2="300" y2="120" stroke="#1f1f1f" strokeDasharray="3,3" />
+              {loading ? (
+                <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">Loading charts...</div>
+              ) : (
+                <>
+                  <svg className="w-full h-full" viewBox="0 0 300 150">
+                    <line x1="0" y1="30" x2="300" y2="30" stroke="#1f1f1f" strokeDasharray="3,3" />
+                    <line x1="0" y1="75" x2="300" y2="75" stroke="#1f1f1f" strokeDasharray="3,3" />
+                    <line x1="0" y1="120" x2="300" y2="120" stroke="#1f1f1f" strokeDasharray="3,3" />
 
-                {/* Glowing area under curve */}
-                <path
-                  d="M 10 130 C 50 110, 100 115, 130 80 S 210 50, 250 40 S 290 20, 290 20 L 290 140 L 10 140 Z"
-                  fill="url(#gradient-area)"
-                  opacity="0.1"
-                />
+                    {/* Area under line */}
+                    <motion.path
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.1 }}
+                      d={getGrowthFillPath()}
+                      fill="url(#gradient-area-dynamic)"
+                    />
 
-                {/* Main line */}
-                <path
-                  d="M 10 130 C 50 110, 100 115, 130 80 S 210 50, 250 40 S 290 20, 290 20"
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
+                    {/* Path line */}
+                    <motion.path
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.8 }}
+                      d={getGrowthSvgPath()}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
 
-                {/* Data Points */}
-                <circle cx="10" cy="130" r="4.5" fill="#3b82f6" stroke="#000" strokeWidth="1.5" />
-                <circle cx="130" cy="80" r="4.5" fill="#3b82f6" stroke="#000" strokeWidth="1.5" />
-                <circle cx="290" cy="20" r="4.5" fill="#06b6d4" stroke="#000" strokeWidth="1.5" />
+                    {/* Points */}
+                    {(stats?.userGrowth[timeRange] || []).map((pt, idx, arr) => {
+                      const minVal = Math.min(...arr.map(p => p.count)) - 50
+                      const maxVal = Math.max(...arr.map(p => p.count)) + 50
+                      const x = 15 + (idx / (arr.length - 1)) * (300 - 30)
+                      const ratio = (pt.count - minVal) / (maxVal - minVal)
+                      const y = 150 - 20 - ratio * 110
+                      return (
+                        <g key={idx} className="group/dot cursor-pointer">
+                          <circle cx={x} cy={y} r="4" fill={idx === arr.length - 1 ? '#06b6d4' : '#3b82f6'} stroke="#000" strokeWidth="1.5" />
+                          <circle cx={x} cy={y} r="8" fill="transparent" />
+                        </g>
+                      )
+                    })}
 
-                {/* Definitions */}
-                <defs>
-                  <linearGradient id="gradient-area" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              
-              <div className="flex justify-between text-[9px] text-neutral-500 px-2 mt-2 font-semibold">
-                <span>MAR</span>
-                <span>APR</span>
-                <span>MAY</span>
-                <span>JUN</span>
-                <span>JUL</span>
-                <span>AUG</span>
-              </div>
+                    <defs>
+                      <linearGradient id="gradient-area-dynamic" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  
+                  <div className="flex justify-between text-[9px] text-neutral-500 px-2 mt-2 font-semibold uppercase">
+                    {(stats?.userGrowth[timeRange] || []).map((pt, idx) => (
+                      <span key={idx}>{pt.label}</span>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -228,21 +314,21 @@ export default function AdminPage() {
             </div>
 
             <div className="space-y-4">
-              {[
-                { name: 'Eiffel Tower guided climb', city: 'Paris', pct: 92, count: 184 },
-                { name: 'Izakaya food tour crawl', city: 'Tokyo', pct: 86, count: 160 },
-                { name: 'Sydney Harbour bridge climb', city: 'Sydney', pct: 74, count: 142 },
-                { name: 'Vatican / Colosseum pass', city: 'Rome', pct: 68, count: 110 }
-              ].map((act, index) => (
+              {(stats?.topActivities || [
+                { name: 'Eiffel Tower guided climb', city: 'Paris', percentage: 92, count: 184 },
+                { name: 'Izakaya food tour crawl', city: 'Tokyo', percentage: 86, count: 160 },
+                { name: 'Sydney Harbour bridge climb', city: 'Sydney', percentage: 74, count: 142 },
+                { name: 'Vatican / Colosseum pass', city: 'Rome', percentage: 68, count: 110 }
+              ]).map((act, index) => (
                 <div key={index} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="font-bold text-white truncate max-w-xs">{act.name} <span className="text-[10px] text-neutral-500 font-semibold">({act.city})</span></span>
+                    <span className="font-bold text-white truncate max-w-[190px]">{act.name} <span className="text-[9px] text-neutral-500 font-semibold">({act.city})</span></span>
                     <span className="text-neutral-400 text-[10px] font-medium">{act.count} logs</span>
                   </div>
                   <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden border border-neutral-850">
                     <div 
                       className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${act.pct}%` }}
+                      style={{ width: `${act.percentage}%` }}
                     />
                   </div>
                 </div>

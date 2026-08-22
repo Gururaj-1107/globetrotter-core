@@ -16,216 +16,19 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { api } from '../services/api'
 
 interface Activity {
   id: string
   name: string
   city: string
-  category: 'Food' | 'Sightseeing' | 'Adventure' | 'Nightlife'
+  category: 'Food' | 'Sightseeing' | 'Adventure' | 'Nightlife' | 'Culture' | 'Stay' | 'Transport'
   cost: number
   duration: string
   rating: number
   image: string
   description: string
 }
-
-// Complete mock catalog of activities across multiple cities
-const ACTIVITY_CATALOG: Activity[] = [
-  // Paris
-  {
-    id: 'act-par-1',
-    name: 'Eiffel Tower Summit Access & Tour',
-    city: 'Paris',
-    category: 'Sightseeing',
-    cost: 45,
-    duration: '2 hours',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80',
-    description: 'Skip the general lines and ascend to the highest accessible platform of the tower with an expert guide.'
-  },
-  {
-    id: 'act-par-2',
-    name: 'Louvre Museum Masterpieces Guided Tour',
-    city: 'Paris',
-    category: 'Sightseeing',
-    cost: 65,
-    duration: '3 hours',
-    rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=500&q=80',
-    description: 'See the Mona Lisa, Venus de Milo, and Winged Victory of Samothrace with a professional art historian.'
-  },
-  {
-    id: 'act-par-3',
-    name: 'Gourmet Seine River Cruise Dinner',
-    city: 'Paris',
-    category: 'Food',
-    cost: 110,
-    duration: '2.5 hours',
-    rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1549146473-3c971f9412c3?auto=format&fit=crop&w=500&q=80',
-    description: 'Savor a refined 3-course French dinner on an all-glass boat while gliding past illuminated monuments.'
-  },
-  {
-    id: 'act-par-4',
-    name: 'Montmartre Secret Food Tour',
-    city: 'Paris',
-    category: 'Food',
-    cost: 75,
-    duration: '3.5 hours',
-    rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1509060464153-4466739f78ad?auto=format&fit=crop&w=500&q=80',
-    description: 'Taste fresh baguettes, local cheeses, pastries, and wines in the artistic, winding streets of Montmartre.'
-  },
-  {
-    id: 'act-par-5',
-    name: 'Catacombs of Paris Underground Exploration',
-    city: 'Paris',
-    category: 'Adventure',
-    cost: 39,
-    duration: '2 hours',
-    rating: 4.5,
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80',
-    description: 'Descend 20 meters underground into a labyrinth of ossuaries containing the bones of six million Parisians.'
-  },
-  {
-    id: 'act-par-6',
-    name: 'Le Marais Pub Crawl & Nightlife Tour',
-    city: 'Paris',
-    category: 'Nightlife',
-    cost: 25,
-    duration: '4 hours',
-    rating: 4.4,
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80',
-    description: 'Experience Paris after dark, visiting stylish cocktail bars, historic pubs, and finishing at a vibrant club.'
-  },
-
-  // Tokyo
-  {
-    id: 'act-tok-1',
-    name: 'Shibuya Crossing & Izakaya Food Crawl',
-    city: 'Tokyo',
-    category: 'Food',
-    cost: 60,
-    duration: '3 hours',
-    rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80',
-    description: 'Stroll Shibuya Crossing and tuck into hidden back-alley izakayas for local yakitori and premium sake.'
-  },
-  {
-    id: 'act-tok-2',
-    name: 'Senso-ji Temple & Asakusa Rickshaw Ride',
-    city: 'Tokyo',
-    category: 'Sightseeing',
-    cost: 40,
-    duration: '1.5 hours',
-    rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=500&q=80',
-    description: 'Explore historical Asakusa in a traditional two-wheeled rickshaw, learning about Tokyo\'s oldest temple.'
-  },
-  {
-    id: 'act-tok-3',
-    name: 'Mount Fuji Forest Hike & Scenic Cable Car',
-    city: 'Tokyo',
-    category: 'Adventure',
-    cost: 135,
-    duration: '10 hours',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80',
-    description: 'Journey to Mt. Fuji 5th Station, hike in the Aokigahara Forest, and enjoy a ropeway over Lake Ashi.'
-  },
-  {
-    id: 'act-tok-4',
-    name: 'Shinjuku Robot & Laser Light Show',
-    city: 'Tokyo',
-    category: 'Nightlife',
-    cost: 80,
-    duration: '2 hours',
-    rating: 4.3,
-    image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=500&q=80',
-    description: 'A sensory overload of giant neon robots, high-energy dancers, taiko drums, and dazzling laser beams.'
-  },
-
-  // New York
-  {
-    id: 'act-nyc-1',
-    name: 'Summit One Vanderbilt Skyline Experience',
-    city: 'New York',
-    category: 'Sightseeing',
-    cost: 49,
-    duration: '1.5 hours',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=500&q=80',
-    description: 'Three floors of multi-sensory art installations and mirrored rooms overlooking the Manhattan skyline.'
-  },
-  {
-    id: 'act-nyc-2',
-    name: 'Chelsea Market & High Line Gastronomy Tour',
-    city: 'New York',
-    category: 'Food',
-    cost: 65,
-    duration: '3 hours',
-    rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=500&q=80',
-    description: 'Eat your way through the historic market building, then walk along the elevated rail line park.'
-  },
-  {
-    id: 'act-nyc-3',
-    name: 'Central Park Guided Bike Hike & Rental',
-    city: 'New York',
-    category: 'Adventure',
-    cost: 35,
-    duration: '2 hours',
-    rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1522083165195-3427ec02927a?auto=format&fit=crop&w=500&q=80',
-    description: 'Rent a quality bike and cycle past Bethesda Terrace, Strawberry Fields, and the reservoir.'
-  },
-  {
-    id: 'act-nyc-4',
-    name: 'Greenwich Village Jazz Club Tour',
-    city: 'New York',
-    category: 'Nightlife',
-    cost: 55,
-    duration: '3.5 hours',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=500&q=80',
-    description: 'Gain entry to two historic underground jazz clubs with drinks and live performance included.'
-  },
-
-  // Rome
-  {
-    id: 'act-rom-1',
-    name: 'Colosseum Gladiator Arena & Roman Forum VIP',
-    city: 'Rome',
-    category: 'Sightseeing',
-    cost: 52,
-    duration: '3 hours',
-    rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=500&q=80',
-    description: 'Walk through the Gladiator\'s Gate directly onto the arena floor and explore the ruins of Rome\'s forum.'
-  },
-  {
-    id: 'act-rom-2',
-    name: 'Trastevere Night Food & Wine Crawl',
-    city: 'Rome',
-    category: 'Food',
-    cost: 85,
-    duration: '4 hours',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=500&q=80',
-    description: 'Sip fine Italian wines, devour homemade cacio e pepe pasta, and try crispy Roman pizza in Trastevere.'
-  },
-  {
-    id: 'act-rom-3',
-    name: 'Rome Crypts & Catacombs Dark History Tour',
-    city: 'Rome',
-    category: 'Adventure',
-    cost: 42,
-    duration: '2.5 hours',
-    rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?auto=format&fit=crop&w=500&q=80',
-    description: 'Explore the Capuchin Crypt (the Bone Chapel) and subterranean Roman burial sites under the city streets.'
-  }
-]
 
 interface StoredTrip {
   id: string
@@ -245,9 +48,12 @@ export default function SearchPage() {
   // State for search query
   const [query, setQuery] = useState(() => searchParams.get('q') || '')
   
+  // Dynamic Activities list
+  const [activitiesList, setActivitiesList] = useState<Activity[]>([])
+  
   // State for Filters
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Food', 'Sightseeing', 'Adventure', 'Nightlife'])
-  const [priceRange, setPriceRange] = useState<number>(150)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Food', 'Sightseeing', 'Adventure', 'Nightlife', 'Culture', 'Stay', 'Transport'])
+  const [priceRange, setPriceRange] = useState<number>(300)
   const [selectedDuration, setSelectedDuration] = useState<string>('All')
   const [selectedRating, setSelectedRating] = useState<number>(0)
   
@@ -256,6 +62,26 @@ export default function SearchPage() {
   const [userTrips, setUserTrips] = useState<StoredTrip[]>([])
   const [selectedTripId, setSelectedTripId] = useState<string>('')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  // Fetch activities from API / mockData store
+  useEffect(() => {
+    const loadActivities = async () => {
+      const data = await api.getActivities()
+      const mapped = data.map(act => ({
+        id: act.id,
+        name: act.name,
+        city: act.cityId.charAt(0).toUpperCase() + act.cityId.slice(1),
+        category: act.category as any,
+        cost: act.cost,
+        duration: act.duration,
+        rating: act.rating,
+        image: act.imageUrl,
+        description: act.description
+      }))
+      setActivitiesList(mapped)
+    }
+    loadActivities()
+  }, [])
 
   // Load user trips from localStorage
   useEffect(() => {
@@ -293,10 +119,10 @@ export default function SearchPage() {
     }
   }
 
-  // Filter Catalog
+  // Filter Catalog dynamically
   const filteredActivities = useMemo(() => {
-    return ACTIVITY_CATALOG.filter(activity => {
-      // 1. Text Query Filter (Match name, city, category, description)
+    return activitiesList.filter(activity => {
+      // 1. Text Query Filter
       const qLower = query.toLowerCase()
       const matchesQuery = 
         activity.name.toLowerCase().includes(qLower) ||
@@ -328,7 +154,7 @@ export default function SearchPage() {
 
       return matchesQuery && matchesCategory && matchesPrice && matchesRating && matchesDuration
     })
-  }, [query, selectedCategories, priceRange, selectedRating, selectedDuration])
+  }, [query, activitiesList, selectedCategories, priceRange, selectedRating, selectedDuration])
 
   // Add selected activity to a trip
   const handleAddToTrip = () => {

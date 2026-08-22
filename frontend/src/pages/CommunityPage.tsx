@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { api } from '../services/api'
 
 interface PublicTrip {
   id: string
@@ -39,85 +40,9 @@ interface PublicTrip {
   }[]
 }
 
-const PUBLIC_TRIPS_FEED: PublicTrip[] = [
-  {
-    id: 'pub-1',
-    title: 'Gourmet Paris & Rome Romancero',
-    authorName: 'Clara Martin',
-    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
-    city: 'Paris',
-    citiesVisited: ['Paris', 'Rome'],
-    durationDays: 10,
-    likes: 312,
-    liked: false,
-    copies: 48,
-    image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80',
-    budget: 4200,
-    activities: [
-      { id: 'pa-1', name: 'Seine Dinner Cruise', category: 'Food', cost: 95, duration: '2.5h' },
-      { id: 'pa-2', name: 'Louvre Museum Tour', category: 'Sightseeing', cost: 65, duration: '3h' },
-      { id: 'pa-3', name: 'Colosseum VIP Entry', category: 'Sightseeing', cost: 52, duration: '3h' }
-    ]
-  },
-  {
-    id: 'pub-2',
-    title: 'Ultramodern Tokyo Foodie Trail',
-    authorName: 'Jin Kenji',
-    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
-    city: 'Tokyo',
-    citiesVisited: ['Tokyo'],
-    durationDays: 5,
-    likes: 204,
-    liked: false,
-    copies: 87,
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
-    budget: 2200,
-    activities: [
-      { id: 'tk-1', name: 'Shibuya Izakaya Food Crawl', category: 'Food', cost: 60, duration: '3h' },
-      { id: 'tk-2', name: 'Robot Restaurant Digital Show', category: 'Nightlife', cost: 80, duration: '2h' }
-    ]
-  },
-  {
-    id: 'pub-3',
-    title: 'Aussie Beaches & Coastal Hikes',
-    authorName: 'Oliver Hughes',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80',
-    city: 'Sydney',
-    citiesVisited: ['Sydney', 'Bondi'],
-    durationDays: 8,
-    likes: 124,
-    liked: false,
-    copies: 19,
-    image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80',
-    budget: 3100,
-    activities: [
-      { id: 'sy-1', name: 'Opera House Tour', category: 'Sightseeing', cost: 50, duration: '2h' },
-      { id: 'sy-2', name: 'Harbour Bridge Climb', category: 'Adventure', cost: 195, duration: '3.5h' }
-    ]
-  },
-  {
-    id: 'pub-4',
-    title: 'Crypts & Historic Rome Ruins',
-    authorName: 'Alessandro R.',
-    authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80',
-    city: 'Rome',
-    citiesVisited: ['Rome'],
-    durationDays: 7,
-    likes: 185,
-    liked: false,
-    copies: 33,
-    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=600&q=80',
-    budget: 2800,
-    activities: [
-      { id: 'rm-1', name: 'Vatican Museums Sistine Chapel', category: 'Sightseeing', cost: 42, duration: '4h' },
-      { id: 'rm-2', name: 'Rome Crypts & Catacombs Tour', category: 'Adventure', cost: 42, duration: '2.5h' }
-    ]
-  }
-]
-
 export default function CommunityPage() {
   const navigate = useNavigate()
-  const [feed, setFeed] = useState<PublicTrip[]>(PUBLIC_TRIPS_FEED)
+  const [feed, setFeed] = useState<PublicTrip[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   
@@ -125,9 +50,19 @@ export default function CommunityPage() {
   const [selectedCityFilter, setSelectedCityFilter] = useState('All')
   const [sortBy, setSortBy] = useState<'Likes' | 'Duration' | 'Budget'>('Likes')
 
+  // Load public posts from API / mockData store
+  useEffect(() => {
+    const loadPosts = async () => {
+      const data = await api.getCommunityPosts()
+      setFeed(data.map(p => ({ ...p, liked: false })))
+    }
+    loadPosts()
+  }, [])
+
   // Handle Like Button click
-  const handleLikeToggle = (id: string, e: React.MouseEvent) => {
+  const handleLikeToggle = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    await api.likeCommunityPost(id)
     setFeed(prev => prev.map(trip => {
       if (trip.id === id) {
         return {
@@ -141,8 +76,9 @@ export default function CommunityPage() {
   }
 
   // Copy Trip details to user's personal list in localStorage
-  const handleCopyTrip = (trip: PublicTrip, e: React.MouseEvent) => {
+  const handleCopyTrip = async (trip: PublicTrip, e: React.MouseEvent) => {
     e.stopPropagation()
+    await api.copyCommunityPost(trip.id)
 
     // Calculate dates starting today
     const start = new Date()
