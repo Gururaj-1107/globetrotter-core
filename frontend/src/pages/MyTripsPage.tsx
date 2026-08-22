@@ -9,7 +9,8 @@ import {
   Trash2, 
   Sparkles,
   Layers,
-  Compass
+  Compass,
+  Plus
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'

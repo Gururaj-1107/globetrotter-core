@@ -8,6 +8,9 @@ import DashboardPage from './pages/DashboardPage'
 import SearchPage from './pages/SearchPage'
 import MyTripsPage from './pages/MyTripsPage'
 import CommunityPage from './pages/CommunityPage'
+import ProfilePage from './pages/ProfilePage'
+import CalendarPage from './pages/CalendarPage'
+import AdminPage from './pages/AdminPage'
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/trips/my-trips" element={<MyTripsPage />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/trips/create" element={<CreateTripPage />} />
         <Route path="/trips/:id/builder" element={<ItineraryBuilderPage />} />
         <Route path="/trips/:id/view" element={<ItineraryViewPage />} />
