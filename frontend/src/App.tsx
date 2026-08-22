@@ -6,6 +6,8 @@ import ItineraryBuilderPage from './pages/ItineraryBuilderPage'
 import ItineraryViewPage from './pages/ItineraryViewPage'
 import DashboardPage from './pages/DashboardPage'
 import SearchPage from './pages/SearchPage'
+import MyTripsPage from './pages/MyTripsPage'
+import CommunityPage from './pages/CommunityPage'
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/signup" element={<LoginPage defaultTab="signup" />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/trips/my-trips" element={<MyTripsPage />} />
+        <Route path="/community" element={<CommunityPage />} />
         <Route path="/trips/create" element={<CreateTripPage />} />
         <Route path="/trips/:id/builder" element={<ItineraryBuilderPage />} />
         <Route path="/trips/:id/view" element={<ItineraryViewPage />} />
