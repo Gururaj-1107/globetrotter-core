@@ -233,6 +233,9 @@ export default function CommunityPage() {
                     <img 
                       src={trip.image} 
                       alt={trip.title}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80'
+                      }}
                       className="w-full h-full object-cover transform group-hover:scale-103 transition-transform duration-500" 
                     />
                     

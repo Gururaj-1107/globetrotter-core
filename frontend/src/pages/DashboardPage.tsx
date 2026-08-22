@@ -149,24 +149,25 @@ export default function DashboardPage() {
 
       <main className="flex-grow">
         {/* Cinematic Header Banner */}
-        <section className="relative h-[65vh] flex flex-col justify-end pb-12 overflow-hidden">
-          <div className="absolute inset-0 z-0">
+        <section className="relative h-[80vh] min-h-[560px] flex flex-col justify-end overflow-hidden">
+          {/* Full-bleed background image shifted upwards and centered */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
             <img 
               src={voyaraBanner} 
               alt="Voyara Travels Banner" 
-              className="w-full h-full object-cover opacity-85 scale-100 transform"
+              className="w-full h-[115%] object-cover object-center -translate-y-8 md:-translate-y-14"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/40" />
           </div>
 
-          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center w-full">
-            {/* Global Search Bar Overlay */}
+          {/* Search bar pinned at the bottom — below the image's PLAN EXPLORE EXPERIENCE text */}
+          <div className="relative z-10 w-full max-w-3xl mx-auto px-6 pb-8">
             <motion.form
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               onSubmit={handleSearchSubmit}
-              className="max-w-2xl mx-auto"
             >
               <div className="relative flex flex-col md:flex-row gap-2 bg-neutral-900/90 backdrop-blur-xl p-2 rounded-2xl md:rounded-full border border-white/10 shadow-2xl">
                 <div className="flex-grow flex items-center px-4 py-2">
@@ -215,7 +216,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Dynamic Filter Dropdowns inside banner */}
+              {/* Dynamic Filter Dropdowns */}
               {filterOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -258,6 +259,7 @@ export default function DashboardPage() {
               )}
             </motion.form>
           </div>
+
         </section>
 
         {/* Top Regional Selections */}
@@ -293,6 +295,9 @@ export default function DashboardPage() {
                   <img 
                     src={dest.image} 
                     alt={dest.name}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80'
+                    }}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
                   />
                   <div className="absolute top-3 left-3 bg-blue-600/90 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">

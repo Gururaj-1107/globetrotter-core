@@ -399,6 +399,9 @@ export default function SearchPage() {
                       <img 
                         src={act.image} 
                         alt={act.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80'
+                        }}
                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
                       />
                       <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[9px] px-2 py-0.5 rounded font-bold text-neutral-300 border border-white/5 uppercase">

@@ -45,6 +45,7 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
     password: '',
     avatarUrl: ''
   })
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setErrorMessage(null)
@@ -52,6 +53,19 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
     if (field === 'email' && emailStep !== 'ENTER_EMAIL') {
       setEmailStep('ENTER_EMAIL')
     }
+  }
+
+  // Photo upload handler for signup
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      setAvatarPreview(base64)
+      setForm((prev) => ({ ...prev, avatarUrl: base64 }))
+    }
+    reader.readAsDataURL(file)
   }
 
   // 1. Email Step Check (Smart Provider Detection Flow)
@@ -163,6 +177,11 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
       setErrorMessage('First Name, Email, and Password are required.')
       return
     }
+    // Block admin email from public signup
+    if (form.email.trim().toLowerCase() === 'admin@globetrotter.com') {
+      setErrorMessage('This email is reserved. Use the admin credentials shown above to sign in.')
+      return
+    }
 
     setLoading(true)
     setErrorMessage(null)
@@ -177,6 +196,7 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
       setLoading(false)
     }
   }
+
 
   // Quick Demo Access Handler
   const handleDemo = async (role: 'traveler' | 'admin' | 'google') => {
@@ -200,7 +220,7 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
   return (
     <div className="min-h-screen bg-[#0a0f1d] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
-      {/* ── Top Demo Logins Bar (1-Click Tester) ── */}
+      {/* ── Top Quick Access Bar ── */}
       <motion.div 
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -208,7 +228,7 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
       >
         <div className="flex items-center gap-2 text-blue-300 font-semibold">
           <Sparkles size={16} className="text-yellow-400" />
-          <span>Quick 1-Click Demo Evaluation:</span>
+          <span>Quick Access:</span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
@@ -216,15 +236,18 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
             disabled={loading}
             className="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600 border border-blue-500/40 rounded-xl text-white font-medium transition-all cursor-pointer"
           >
-            👤 Demo Traveler (Alex)
+            👤 Traveler Login (Alex)
           </button>
-          <button
-            onClick={() => handleDemo('admin')}
-            disabled={loading}
-            className="px-3 py-1.5 bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 rounded-xl text-white font-medium transition-all cursor-pointer"
-          >
-            🛡️ Demo Admin (Clara)
-          </button>
+
+          {/* Admin credentials — static display, no auto-login */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-900/30 border border-purple-500/30 rounded-xl text-purple-200">
+            <span>🛡️</span>
+            <span className="font-semibold text-purple-300">Admin:</span>
+            <span className="font-mono text-white/80 select-all">admin@globetrotter.com</span>
+            <span className="text-white/40 mx-0.5">/</span>
+            <span className="font-mono text-white/80 select-all">admin123</span>
+          </div>
+
           <button
             onClick={() => handleDemo('google')}
             disabled={loading}
@@ -234,6 +257,7 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
           </button>
         </div>
       </motion.div>
+
 
       {/* ── Main Split Panel Container ── */}
       <div className="w-full max-w-5xl bg-neutral-900/90 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex min-h-[640px] backdrop-blur-2xl">
@@ -450,12 +474,31 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
                 onSubmit={handleRegister}
                 className="flex flex-col gap-3.5"
               >
-                {/* Photo Upload Circle */}
-                <div className="flex justify-center mb-1">
-                  <div className="w-16 h-16 rounded-full border-2 border-dashed border-blue-400/40 bg-blue-500/10 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-500/20 transition-all group">
-                    <User size={20} className="text-blue-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-[9px] text-blue-300 mt-0.5 font-medium">Photo</span>
-                  </div>
+                {/* Photo Upload Circle — Real File Upload */}
+                <div className="flex flex-col items-center mb-1 gap-1">
+                  <label className="relative cursor-pointer group">
+                    <div className="w-20 h-20 rounded-full border-2 border-dashed border-blue-400/40 bg-blue-500/10 hover:border-blue-400 hover:bg-blue-500/20 transition-all overflow-hidden flex items-center justify-center">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <User size={22} className="text-blue-400 group-hover:scale-110 transition-transform" />
+                          <span className="text-[9px] text-blue-300 mt-0.5 font-medium">Photo</span>
+                        </div>
+                      )}
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+                        <span className="text-[9px] text-white font-semibold">Change</span>
+                      </div>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[9px] text-white/40">Click to upload profile photo</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">

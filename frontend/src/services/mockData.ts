@@ -73,7 +73,7 @@ export const CITIES: City[] = [
     country: 'Japan',
     region: 'Asia',
     costIndex: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
     description: 'A futuristic metropolis blended with traditional shrines and cherry blossom pathways.'
   },
   {
@@ -172,7 +172,7 @@ export const CITIES: City[] = [
     country: 'Japan',
     region: 'Asia',
     costIndex: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
     description: 'Historic city known for thousands of classical Buddhist temples, gardens, and imperial palaces.'
   },
   {
@@ -227,7 +227,7 @@ export const ACTIVITIES: Activity[] = [
     cost: 95,
     duration: '2.5 hours',
     rating: 4.7,
-    imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1471623432079-b009d30b6729?auto=format&fit=crop&w=500&q=80',
     description: 'A 3-course French dinner on an glass boat floating down the Seine.'
   },
   {
@@ -273,7 +273,7 @@ export const ACTIVITIES: Activity[] = [
     cost: 55,
     duration: '3 hours',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80',
     description: 'Eat your way through Shibuya\'s neon-lit Izakayas and try fresh sushi.'
   },
   {
@@ -295,7 +295,7 @@ export const ACTIVITIES: Activity[] = [
     cost: 120,
     duration: '9 hours',
     rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80',
     description: 'Hike Table mountain peaks and enjoy a ropeway over Lake Ashi.'
   },
   {
@@ -509,7 +509,7 @@ export const ACTIVITIES: Activity[] = [
     cost: 15,
     duration: '2.5 hours',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80',
     description: 'Hike through paths of thousands of vermilion shrine gates.'
   },
 
@@ -580,7 +580,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     durationDays: 5,
     likes: 204,
     copies: 87,
-    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
     budget: 2200,
     activities: [
       { id: 'act-7', name: 'Shibuya Crossing Foodie Crawl', category: 'Food', cost: 55, duration: '3 hours' },
