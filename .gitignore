@@ -1,0 +1,29 @@
+# OS
+.DS_Store
+Thumbs.db
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Large binary files (design assets - keep in Drive, not git)
+*.pdf
+*.docx
+Screenshot*.png
