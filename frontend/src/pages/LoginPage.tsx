@@ -106,29 +106,26 @@ export default function LoginPage({ defaultTab = 'signin' }: LoginPageProps) {
     }
   }
 
-  // 3. Google Sign-In Simulation
+  // 3. Google Sign-In
   const handleGoogleSignIn = async (emailOverride?: string) => {
     setLoading(true)
     setErrorMessage(null)
 
-    const emailToUse = emailOverride || form.email || 'rahul@gmail.com'
-    const nameToUse = emailToUse.split('@')[0]
-
     try {
-      const loggedUser = await googleAuth({
-        email: emailToUse,
-        firstName: nameToUse.charAt(0).toUpperCase() + nameToUse.slice(1),
-        lastName: 'Traveler',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
-      })
+      // If an emailOverride is explicitly passed (e.g. from Google-detected alert), use it;
+      // otherwise pass undefined so the genuine Firebase Google Popup opens!
+      const param = emailOverride ? { email: emailOverride } : undefined
+      const loggedUser = await googleAuth(param)
 
-      // If user doesn't have a password yet, offer password creation!
       if (loggedUser.authProvider === 'GOOGLE' && loggedUser.needsPasswordSetup) {
         setShowPasswordSetupModal(true)
       } else {
         navigate('/dashboard')
       }
     } catch (err: any) {
+      if (err.message?.includes('cancelled') || err.code === 'auth/popup-closed-by-user') {
+        return
+      }
       setErrorMessage(err.message || 'Google Authentication failed')
     } finally {
       setLoading(false)

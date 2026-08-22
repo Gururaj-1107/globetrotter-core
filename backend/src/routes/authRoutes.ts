@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
+import { PrismaClient } from '@prisma/client'
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/authMiddleware'
 
 const router = Router()
+const prisma = new PrismaClient()
 
-// In-memory / DB User store
+// In-memory fallback / cache store
 export interface UserRecord {
   id: string
   email: string
@@ -22,7 +24,6 @@ export interface UserRecord {
   createdAt: string
 }
 
-// Initial demo users
 export let USERS: UserRecord[] = [
   {
     id: 'usr-demo-wanderer',
@@ -72,13 +73,44 @@ export let USERS: UserRecord[] = [
 ]
 
 // 1. Check Auth Provider for an email (Edge Case Step 1)
-router.post('/check-provider', (req: Request, res: Response) => {
+router.post('/check-provider', async (req: Request, res: Response) => {
   const { email } = req.body
   if (!email) {
     return res.status(400).json({ error: 'Email is required' })
   }
 
   const normalizedEmail = email.trim().toLowerCase()
+
+  try {
+    // Try PostgreSQL via Prisma
+    const dbUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (dbUser) {
+      if (dbUser.authProvider === 'GOOGLE' && !dbUser.passwordHash) {
+        return res.json({
+          exists: true,
+          provider: 'GOOGLE',
+          hasPassword: false,
+          message: 'This account was created using Google Sign-In.',
+          actionRequired: 'CONTINUE_WITH_GOOGLE',
+          user: {
+            email: dbUser.email,
+            firstName: dbUser.firstName,
+            avatarUrl: dbUser.avatarUrl
+          }
+        })
+      }
+
+      return res.json({
+        exists: true,
+        provider: dbUser.authProvider,
+        hasPassword: !!dbUser.passwordHash,
+        actionRequired: 'ENTER_PASSWORD'
+      })
+    }
+  } catch (e) {
+    // Prisma fallback to local array
+  }
+
   const user = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
 
   if (!user) {
@@ -89,7 +121,7 @@ router.post('/check-provider', (req: Request, res: Response) => {
     })
   }
 
-  if (user.authProvider === 'GOOGLE') {
+  if (user.authProvider === 'GOOGLE' && !user.passwordHash) {
     return res.json({
       exists: true,
       provider: 'GOOGLE',
@@ -120,27 +152,53 @@ router.post('/google-auth', async (req: Request, res: Response) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase()
-  let user = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+  let user: any = null
 
-  if (!user) {
-    // First-time Google user sign up
-    user = {
-      id: `usr-g-${Date.now()}`,
-      email: normalizedEmail,
-      googleId: googleId || `google-${Date.now()}`,
-      authProvider: 'GOOGLE',
-      firstName: firstName || email.split('@')[0],
-      lastName: lastName || '',
-      avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      bio: 'GlobeTrotter explorer signed up with Google.',
-      role: 'USER',
-      createdAt: new Date().toISOString()
+  try {
+    // Try PostgreSQL via Prisma
+    let dbUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          email: normalizedEmail,
+          googleId: googleId || `google-${Date.now()}`,
+          authProvider: 'GOOGLE',
+          firstName: firstName || email.split('@')[0],
+          lastName: lastName || '',
+          avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+          bio: 'GlobeTrotter explorer signed up with Google.',
+          role: 'USER'
+        }
+      })
+    } else if (!dbUser.googleId) {
+      dbUser = await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { googleId: googleId || `google-${Date.now()}`, authProvider: 'BOTH' }
+      })
     }
-    USERS.push(user)
-  } else if (!user.googleId) {
-    // User signed up previously with password, now linking Google
-    user.googleId = googleId || `google-${Date.now()}`
-    user.authProvider = 'BOTH'
+    user = dbUser
+  } catch (e) {
+    // Fallback to in-memory store
+    let memUser = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+    if (!memUser) {
+      memUser = {
+        id: `usr-g-${Date.now()}`,
+        email: normalizedEmail,
+        googleId: googleId || `google-${Date.now()}`,
+        authProvider: 'GOOGLE',
+        firstName: firstName || email.split('@')[0],
+        lastName: lastName || '',
+        avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        bio: 'GlobeTrotter explorer signed up with Google.',
+        role: 'USER',
+        createdAt: new Date().toISOString()
+      }
+      USERS.push(memUser)
+    } else if (!memUser.googleId) {
+      memUser.googleId = googleId || `google-${Date.now()}`
+      memUser.authProvider = 'BOTH'
+    }
+    user = memUser
   }
 
   const token = generateToken({
@@ -184,23 +242,36 @@ router.post('/link-password', authenticateToken, async (req: AuthRequest, res: R
     return res.status(400).json({ error: 'Passwords do not match' })
   }
 
-  const user = USERS.find(u => u.id === userId)
-  if (!user) {
+  const passwordHash = await bcrypt.hash(password, 10)
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, authProvider: 'BOTH' }
+    })
+    return res.json({
+      success: true,
+      message: 'Password successfully created and linked to your account.',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        authProvider: updated.authProvider
+      }
+    })
+  } catch (e) {
+    // Fallback
+    const memUser = USERS.find(u => u.id === userId)
+    if (memUser) {
+      memUser.passwordHash = passwordHash
+      memUser.authProvider = 'BOTH'
+      return res.json({
+        success: true,
+        message: 'Password successfully created and linked to your account.',
+        user: { id: memUser.id, email: memUser.email, authProvider: memUser.authProvider }
+      })
+    }
     return res.status(404).json({ error: 'User not found' })
   }
-
-  user.passwordHash = await bcrypt.hash(password, 10)
-  user.authProvider = 'BOTH'
-
-  return res.json({
-    success: true,
-    message: 'Password successfully created and linked to your account. You can now sign in using both Google and Email + Password.',
-    user: {
-      id: user.id,
-      email: user.email,
-      authProvider: user.authProvider
-    }
-  })
 })
 
 // 4. Standard Email + Password Login
@@ -212,13 +283,22 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase()
-  const user = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+  let user: any = null
+
+  try {
+    user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+  } catch (e) {
+    user = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+  }
+
+  if (!user) {
+    user = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+  }
 
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password' })
   }
 
-  // Edge case: If user registered strictly with Google and hasn't set a password
   if (user.authProvider === 'GOOGLE' && !user.passwordHash) {
     return res.status(400).json({
       error: 'This account was created using Google Sign-In. Please sign in with Google.',
@@ -268,29 +348,54 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase()
-  const existing = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
-  if (existing) {
-    return res.status(409).json({ error: 'An account with this email already exists. Please sign in.' })
-  }
-
   const passwordHash = await bcrypt.hash(password, 10)
-  const newUser: UserRecord = {
-    id: `usr-${Date.now()}`,
-    email: normalizedEmail,
-    passwordHash,
-    authProvider: 'EMAIL_PASSWORD',
-    firstName: firstName.trim(),
-    lastName: (lastName || '').trim(),
-    phoneNumber: phone || '',
-    city: city || '',
-    country: country || '',
-    avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-    bio: bio || '',
-    role: 'USER',
-    createdAt: new Date().toISOString()
-  }
+  let newUser: any = null
 
-  USERS.push(newUser)
+  try {
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please sign in.' })
+    }
+
+    newUser = await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash,
+        authProvider: 'EMAIL_PASSWORD',
+        firstName: firstName.trim(),
+        lastName: (lastName || '').trim(),
+        phoneNumber: phone || '',
+        city: city || '',
+        country: country || '',
+        avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        bio: bio || '',
+        role: 'USER'
+      }
+    })
+  } catch (e) {
+    // Memory fallback
+    const existingMem = USERS.find(u => u.email.toLowerCase() === normalizedEmail)
+    if (existingMem) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please sign in.' })
+    }
+
+    newUser = {
+      id: `usr-${Date.now()}`,
+      email: normalizedEmail,
+      passwordHash,
+      authProvider: 'EMAIL_PASSWORD',
+      firstName: firstName.trim(),
+      lastName: (lastName || '').trim(),
+      phoneNumber: phone || '',
+      city: city || '',
+      country: country || '',
+      avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      bio: bio || '',
+      role: 'USER',
+      createdAt: new Date().toISOString()
+    }
+    USERS.push(newUser)
+  }
 
   const token = generateToken({
     id: newUser.id,
@@ -320,8 +425,20 @@ router.post('/register', async (req: Request, res: Response) => {
 })
 
 // 6. Get Current User Profile (Me)
-router.get('/me', authenticateToken, (req: AuthRequest, res: Response) => {
-  const user = USERS.find(u => u.id === req.user?.id)
+router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id
+  let user: any = null
+
+  try {
+    user = await prisma.user.findUnique({ where: { id: userId } })
+  } catch (e) {
+    user = USERS.find(u => u.id === userId)
+  }
+
+  if (!user) {
+    user = USERS.find(u => u.id === userId)
+  }
+
   if (!user) {
     return res.status(404).json({ error: 'User profile not found' })
   }
@@ -344,37 +461,59 @@ router.get('/me', authenticateToken, (req: AuthRequest, res: Response) => {
 })
 
 // 7. Update Profile
-router.put('/profile', authenticateToken, (req: AuthRequest, res: Response) => {
-  const user = USERS.find(u => u.id === req.user?.id)
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' })
-  }
-
+router.put('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id
   const { firstName, lastName, phoneNumber, city, country, bio, avatarUrl } = req.body
-  if (firstName) user.firstName = firstName
-  if (lastName !== undefined) user.lastName = lastName
-  if (phoneNumber !== undefined) user.phoneNumber = phoneNumber
-  if (city !== undefined) user.city = city
-  if (country !== undefined) user.country = country
-  if (bio !== undefined) user.bio = bio
-  if (avatarUrl) user.avatarUrl = avatarUrl
 
-  return res.json({
-    message: 'Profile updated successfully',
-    user: {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phoneNumber: user.phoneNumber,
-      city: user.city,
-      country: user.country,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
-      role: user.role,
-      authProvider: user.authProvider
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(firstName ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {}),
+        ...(phoneNumber !== undefined ? { phoneNumber } : {}),
+        ...(city !== undefined ? { city } : {}),
+        ...(country !== undefined ? { country } : {}),
+        ...(bio !== undefined ? { bio } : {}),
+        ...(avatarUrl ? { avatarUrl } : {})
+      }
+    })
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        phoneNumber: updated.phoneNumber,
+        city: updated.city,
+        country: updated.country,
+        avatarUrl: updated.avatarUrl,
+        bio: updated.bio,
+        role: updated.role,
+        authProvider: updated.authProvider
+      }
+    })
+  } catch (e) {
+    const user = USERS.find(u => u.id === userId)
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
-  })
+
+    if (firstName) user.firstName = firstName
+    if (lastName !== undefined) user.lastName = lastName
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber
+    if (city !== undefined) user.city = city
+    if (country !== undefined) user.country = country
+    if (bio !== undefined) user.bio = bio
+    if (avatarUrl) user.avatarUrl = avatarUrl
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user
+    })
+  }
 })
 
 export default router
