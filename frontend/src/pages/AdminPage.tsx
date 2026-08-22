@@ -14,6 +14,8 @@ import {
   Sliders,
   Compass
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { api } from '../services/api'
@@ -30,13 +32,15 @@ interface UserRecord {
 
 const INITIAL_USERS: UserRecord[] = [
   { id: 'usr-1', name: 'John Doe', email: 'john.doe@globetrotter.com', role: 'USER', status: 'ACTIVE', registeredDate: '2026-05-12' },
-  { id: 'usr-2', name: 'Clara Martin', email: 'clara.m@gmail.com', role: 'ADMIN', status: 'ACTIVE', registeredDate: '2025-11-04' },
-  { id: 'usr-3', name: 'Jin Kenji', email: 'jin.kenji@yahoo.co.jp', role: 'USER', status: 'ACTIVE', registeredDate: '2026-02-18' },
-  { id: 'usr-4', name: 'Oliver Hughes', email: 'oliver.h@sydney.edu', role: 'USER', status: 'ACTIVE', registeredDate: '2026-07-22' },
+  { id: 'usr-2', name: 'Clara Martin', email: 'admin@globetrotter.com', role: 'ADMIN', status: 'ACTIVE', registeredDate: '2025-11-04' },
+  { id: 'usr-3', name: 'Alex Rivers', email: 'traveler@globetrotter.com', role: 'USER', status: 'ACTIVE', registeredDate: '2026-02-18' },
+  { id: 'usr-4', name: 'Rahul Sharma', email: 'rahul@gmail.com', role: 'USER', status: 'ACTIVE', registeredDate: '2026-07-22' },
   { id: 'usr-5', name: 'Takeshi Sato', email: 'sato.t@gmail.com', role: 'USER', status: 'INACTIVE', registeredDate: '2026-01-30' }
 ]
 
 export default function AdminPage() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [users, setUsers] = useState<UserRecord[]>(INITIAL_USERS)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   
@@ -44,6 +48,14 @@ export default function AdminPage() {
   const [timeRange, setTimeRange] = useState<'7days' | '30days' | '1year'>('30days')
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Redirect if not Admin
+  useEffect(() => {
+    if (user && user.role !== 'ADMIN') {
+      alert('Access Restricted: Only Admin accounts can access the Admin Analytics Panel.')
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   // Fetch admin stats when timeframe selector changes
   useEffect(() => {

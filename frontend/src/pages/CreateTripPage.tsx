@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, MapPin, DollarSign, Tag, ArrowRight, Check, Compass } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { useAuth } from '../context/AuthContext'
 
 // Mock Data for Cities and their corresponding Activities Suggestions
 interface ActivitySuggestion {
@@ -63,6 +64,7 @@ const popularCities = ['Paris', 'Tokyo', 'New York', 'Rome', 'Sydney']
 
 export default function CreateTripPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   
   // Form States
   const [title, setTitle] = useState('')
@@ -118,8 +120,11 @@ export default function CreateTripPage() {
     const selectedActivitiesFull = activities.filter((act) => selectedActivityIds.includes(act.id))
     
     // Create the trip payload
+    const currentUserId = user?.id || 'usr-demo-wanderer'
+    const newTripId = `trip-${Date.now()}`
     const tripData = {
-      id: `trip-${Date.now()}`,
+      id: newTripId,
+      userId: currentUserId,
       title,
       city: selectedCity,
       startDate,

@@ -98,24 +98,34 @@ const CITY_IMAGES: Record<string, string> = {
   'Sydney': 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80'
 }
 
+import { useAuth } from '../context/AuthContext'
+
 export default function MyTripsPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'ONGOING' | 'UPCOMING' | 'COMPLETED'>('ONGOING')
   const [trips, setTrips] = useState<StoredTrip[]>([])
 
-  // Load trips from localStorage & merge with mock data to look full and beautiful
+  const currentUserId = user?.id || 'usr-demo-wanderer'
+
+  // Load trips strictly for the current logged-in user
   useEffect(() => {
     const list: StoredTrip[] = []
     
-    // Parse localStorage
+    // Parse localStorage for this user's trips
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
       if (key && key.startsWith('globetrotter_trip_') && key !== 'globetrotter_trip_new') {
         try {
           const tripData = JSON.parse(localStorage.getItem(key) || '')
           
-          // Determine status based on dates
-          const today = new Date('2026-08-22') // matching local time context
+          // Match user ID or default demo wanderer
+          const tripUserId = tripData.userId || 'usr-demo-wanderer'
+          if (tripUserId !== currentUserId && currentUserId !== 'usr-demo-admin') {
+            continue
+          }
+          
+          const today = new Date('2026-08-22')
           const start = new Date(tripData.startDate)
           const end = new Date(tripData.endDate)
           
@@ -145,16 +155,17 @@ export default function MyTripsPage() {
       }
     }
 
-    // Merge with mock trips if they don't exist already to avoid empty screens
-    const mergedList = [...list]
-    MOCK_TRIPS.forEach(mockTrip => {
-      if (!mergedList.some(t => t.id === mockTrip.id)) {
-        mergedList.push(mockTrip)
-      }
-    })
+    // Only load demo trips if the user is the demo wanderer (Alex) or Admin
+    if (currentUserId === 'usr-demo-wanderer' || currentUserId === 'usr-demo-admin') {
+      MOCK_TRIPS.forEach(mockTrip => {
+        if (!list.some(t => t.id === mockTrip.id)) {
+          list.push(mockTrip)
+        }
+      })
+    }
 
-    setTrips(mergedList)
-  }, [])
+    setTrips(list)
+  }, [currentUserId])
 
   const handleDeleteTrip = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()

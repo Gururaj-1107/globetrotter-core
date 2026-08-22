@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Globe, Menu, X, Shield, Sparkles } from 'lucide-react'
+import { Globe, Menu, X, Shield } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const landingLinks = [
@@ -11,14 +11,13 @@ const landingLinks = [
   { label: 'About', href: '#about' },
 ]
 
-const appLinks = [
+const baseAppLinks = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Explore Search', href: '/search' },
   { label: 'My Trips', href: '/trips/my-trips' },
   { label: 'Community Feed', href: '/community' },
   { label: 'Calendar', href: '/calendar' },
-  { label: 'Profile', href: '/profile' },
-  { label: 'Admin Metrics', href: '/admin' }
+  { label: 'Profile', href: '/profile' }
 ]
 
 export default function Navbar() {
@@ -44,6 +43,11 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Only show Admin Metrics if user is ADMIN
+  const appLinks = user?.role === 'ADMIN'
+    ? [...baseAppLinks, { label: 'Admin Metrics', href: '/admin' }]
+    : baseAppLinks
 
   const activeLinks = isAppView ? appLinks : landingLinks
 
@@ -114,9 +118,16 @@ export default function Navbar() {
             {isAppView ? (
               <div className="flex items-center gap-3">
                 {user && (
-                  <span className="text-xs text-white/60 font-medium hidden xl:inline">
-                    Hello, <strong className="text-white">{user.firstName}</strong>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/60 font-medium hidden xl:inline">
+                      Hello, <strong className="text-white">{user.firstName}</strong>
+                    </span>
+                    {user.role === 'ADMIN' && (
+                      <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={handleSignOut}
