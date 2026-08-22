@@ -73,7 +73,7 @@ export let CITIES: City[] = [
     country: 'Japan',
     region: 'Asia',
     costIndex: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
     description: 'A futuristic metropolis blended with traditional shrines and cherry blossom pathways.'
   },
   {
@@ -109,7 +109,7 @@ export let CITIES: City[] = [
     country: 'United Kingdom',
     region: 'Europe',
     costIndex: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ca1ad?auto=format&fit=crop&w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?auto=format&fit=crop&w=600&q=80',
     description: 'History merges with modern culture beside the River Thames and Big Ben.'
   },
   {
@@ -118,7 +118,7 @@ export let CITIES: City[] = [
     country: 'Spain',
     region: 'Europe',
     costIndex: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efedd?auto=format&fit=crop&w=600&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=600&q=80',
     description: 'Catalan capital famed for Gaudi architecture, beaches, and tapas.'
   },
   {
@@ -227,7 +227,7 @@ export let ACTIVITIES: Activity[] = [
     cost: 95,
     duration: '2.5 hours',
     rating: 4.7,
-    imageUrl: 'https://images.unsplash.com/photo-1549146473-3c971f9412c3?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=500&q=80',
     description: 'A 3-course French dinner on an glass boat floating down the Seine.'
   },
   {
@@ -260,7 +260,7 @@ export let ACTIVITIES: Activity[] = [
     cost: 80,
     duration: '2.3 hours',
     rating: 4.6,
-    imageUrl: 'https://images.unsplash.com/photo-1532103054090-334e6e60ab29?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1541417904950-b855846fe074?auto=format&fit=crop&w=500&q=80',
     description: 'High-speed transit connecting Paris Gare du Nord to London St Pancras.'
   },
 
@@ -273,7 +273,7 @@ export let ACTIVITIES: Activity[] = [
     cost: 55,
     duration: '3 hours',
     rating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80',
     description: 'Eat your way through Shibuya\'s neon-lit Izakayas and try fresh sushi.'
   },
   {
@@ -341,7 +341,7 @@ export let ACTIVITIES: Activity[] = [
     cost: 30,
     duration: '2 hours',
     rating: 4.6,
-    imageUrl: 'https://images.unsplash.com/photo-1522083165195-3427ec02927a?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=500&q=80',
     description: 'Cycle around castles, fountains, and lakes.'
   },
   {
@@ -376,7 +376,7 @@ export let ACTIVITIES: Activity[] = [
     cost: 42,
     duration: '4 hours',
     rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1529260830199-4455210982ba?auto=format&fit=crop&w=500&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1531572753322-ad063cecc140?auto=format&fit=crop&w=500&q=80',
     description: 'Vatican museum galleries and Michelangelo masterpieces.'
   },
   {
@@ -421,7 +421,7 @@ export let COMMUNITY_POSTS: CommunityPost[] = [
     durationDays: 5,
     likes: 204,
     copies: 87,
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
     budget: 2200,
     activities: [
       { id: 'act-7', name: 'Shibuya Crossing Foodie Crawl', category: 'Food', cost: 55, duration: '3 hours' },

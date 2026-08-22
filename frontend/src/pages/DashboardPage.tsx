@@ -41,7 +41,7 @@ const REGIONAL_SELECTIONS: RegionalDestination[] = [
     id: 'tokyo',
     name: 'Tokyo',
     country: 'Japan',
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
     description: 'Ultramodern neon skyscrapers juxtaposed with historic temples.',
     badge: 'Asia',
     popularity: 'Popular'

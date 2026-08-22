@@ -69,7 +69,7 @@ const MOCK_TRIPS: StoredTrip[] = [
       { id: 'act-5', name: 'Mount Fuji Day Trip', category: 'Adventure', cost: 120, duration: '9h' }
     ],
     status: 'UPCOMING',
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
     stopsCount: 4
   },
   {
@@ -92,7 +92,7 @@ const MOCK_TRIPS: StoredTrip[] = [
 
 const CITY_IMAGES: Record<string, string> = {
   'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
-  'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80',
+  'Tokyo': 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
   'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=600&q=80',
   'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=600&q=80',
   'Sydney': 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80'

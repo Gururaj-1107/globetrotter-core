@@ -88,7 +88,7 @@ async function main() {
       region: 'Asia',
       costIndex: 4,
       popularityScore: 96,
-      imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
       description: 'A futuristic metropolis blended with traditional shrines and cherry blossom pathways.'
     },
     {
@@ -168,11 +168,11 @@ async function main() {
     // Paris
     { id: 'par-1', cityId: 'paris', name: 'Eiffel Tower Summit Access', category: 'Sightseeing', cost: 45, duration: '2 hours', rating: 4.9, imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80', description: 'Experience breathtaking panoramic views from the very top of Paris.' },
     { id: 'par-2', cityId: 'paris', name: 'Louvre Museum Guided Tour', category: 'Culture', cost: 65, duration: '3 hours', rating: 4.8, imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80', description: 'Skip the lines and explore the Mona Lisa and classic Venus de Milo.' },
-    { id: 'par-3', cityId: 'paris', name: 'Seine River Cruise & 3-Course Dinner', category: 'Food', cost: 95, duration: '2.5 hours', rating: 4.7, imageUrl: 'https://images.unsplash.com/photo-1549146473-3c971f9412c3?auto=format&fit=crop&w=600&q=80', description: 'Dine on French gourmet cuisine while floating past illuminated historical monuments.' },
+    { id: 'par-3', cityId: 'paris', name: 'Seine River Cruise & 3-Course Dinner', category: 'Food', cost: 95, duration: '2.5 hours', rating: 4.7, imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80', description: 'Dine on French gourmet cuisine while floating past illuminated historical monuments.' },
     { id: 'par-4', cityId: 'paris', name: 'Montmartre Bohemian Artists Walk', category: 'Culture', cost: 25, duration: '2 hours', rating: 4.9, imageUrl: 'https://images.unsplash.com/photo-1509060464153-4466739f78ad?auto=format&fit=crop&w=600&q=80', description: 'Walk through cobble-stone alleys and discover the Sacré-Cœur basilica.' },
     
     // Tokyo
-    { id: 'tok-1', cityId: 'tokyo', name: 'Shibuya Crossing & Foodie Walk', category: 'Food', cost: 55, duration: '3 hours', rating: 4.9, imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80', description: 'Cross the busiest intersection in the world and taste Michelin-rated yakitori.' },
+    { id: 'tok-1', cityId: 'tokyo', name: 'Shibuya Crossing & Foodie Walk', category: 'Food', cost: 55, duration: '3 hours', rating: 4.9, imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80', description: 'Cross the busiest intersection in the world and taste Michelin-rated yakitori.' },
     { id: 'tok-2', cityId: 'tokyo', name: 'Senso-ji Temple & Historic Asakusa', category: 'Culture', cost: 20, duration: '2 hours', rating: 4.8, imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80', description: 'Discover Tokyo’s oldest Buddhist shrine and traditional Nakamise shopping arcade.' },
     { id: 'tok-3', cityId: 'tokyo', name: 'Mount Fuji Day Trip & Hakone Cable Car', category: 'Adventure', cost: 120, duration: '8 hours', rating: 4.9, imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80', description: 'Panoramic vistas of the sacred volcano with Lake Ashi cruise.' },
 
